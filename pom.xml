@@ -4,7 +4,7 @@
 
     <groupId>no.ssb.config</groupId>
     <artifactId>dynamic-configuration</artifactId>
-    <version>0.1</version>
+    <version>0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Dynamic Configuration</name>
@@ -45,7 +45,7 @@
         <connection>scm:git:git://github.com/statisticsnorway/dynamic-configuration.git</connection>
         <developerConnection>scm:git:git@github.com:statisticsnorway/dynamic-configuration.git</developerConnection>
         <url>https://github.com/statisticsnorway/dynamic-configuration/tree/master</url>
-        <tag>v0.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
