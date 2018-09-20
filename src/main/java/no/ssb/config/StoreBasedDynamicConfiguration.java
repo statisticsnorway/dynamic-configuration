@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -23,9 +24,9 @@ import java.util.Properties;
 
 public class StoreBasedDynamicConfiguration implements DynamicConfiguration {
 
-    private final List<Store> storeList;
+    private final Deque<Store> storeList;
 
-    private StoreBasedDynamicConfiguration(List<Store> storeList) {
+    private StoreBasedDynamicConfiguration(Deque<Store> storeList) {
         this.storeList = storeList;
     }
 
@@ -217,47 +218,29 @@ public class StoreBasedDynamicConfiguration implements DynamicConfiguration {
     }
 
     public static class Builder {
-        final List<String> propertyResourcePathList = new ArrayList<>();
-        boolean systemProperties = false;
-        boolean environment = false;
-        String environmentPrefix;
-        final List<String[]> valuesList = new ArrayList<>();
+        final Deque<Store> storeList = new LinkedList<>();
 
         public Builder propertiesResource(String resourcePath) {
-            propertyResourcePathList.add(resourcePath);
+            storeList.addFirst(new PropertiesStore(resourcePath));
             return this;
         }
 
         public Builder environment(String prefix) {
-            environment = true;
-            environmentPrefix = prefix;
+            storeList.addFirst(new EnvironmentStore(prefix));
             return this;
         }
 
         public Builder systemProperties() {
-            systemProperties = true;
+            storeList.addFirst(new SystemPropertiesStore());
             return this;
         }
 
         public Builder values(String... keyValuePairs) {
-            valuesList.add(keyValuePairs);
+            storeList.addFirst(new HardcodedStore(keyValuePairs));
             return this;
         }
 
         public StoreBasedDynamicConfiguration build() {
-            LinkedList<Store> storeList = new LinkedList<>();
-            for (String resourcePath : propertyResourcePathList) {
-                storeList.addFirst(new PropertiesStore(resourcePath));
-            }
-            if (environment) {
-                storeList.addFirst(new EnvironmentStore(environmentPrefix));
-            }
-            if (systemProperties) {
-                storeList.addFirst(new SystemPropertiesStore());
-            }
-            for (String[] keyValuePairs : valuesList) {
-                storeList.addFirst(new HardcodedStore(keyValuePairs));
-            }
             return new StoreBasedDynamicConfiguration(storeList);
         }
     }
