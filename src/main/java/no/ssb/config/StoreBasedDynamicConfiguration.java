@@ -53,6 +53,19 @@ public class StoreBasedDynamicConfiguration implements DynamicConfiguration {
         return Boolean.parseBoolean(evaluateToString(key));
     }
 
+    @Override
+    public Map<String, String> asMap() {
+        Map<String,String> map = new LinkedHashMap<>();
+        for(Store store : storeList) {
+            if (store instanceof PropertiesStore) {
+                map.putAll(((PropertiesStore) store).propertyByName);
+            } else if (store instanceof HardcodedStore) {
+                map.putAll(((HardcodedStore) store).valueByKey);
+            }
+        }
+        return map;
+    }
+
     private interface Store {
         /**
          * @param key
