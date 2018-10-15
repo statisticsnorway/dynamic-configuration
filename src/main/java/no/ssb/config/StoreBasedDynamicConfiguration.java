@@ -55,13 +55,11 @@ public class StoreBasedDynamicConfiguration implements DynamicConfiguration {
 
     @Override
     public Map<String, String> asMap() {
-        Map<String,String> map = new LinkedHashMap<>();
-        for(Store store : storeList) {
-            if (store instanceof PropertiesStore) {
-                map.putAll(((PropertiesStore) store).propertyByName);
-            } else if (store instanceof HardcodedStore) {
-                map.putAll(((HardcodedStore) store).valueByKey);
-            }
+        Map<String, String> map = new LinkedHashMap<>();
+        Iterator<Store> it = storeList.descendingIterator();
+        while (it.hasNext()) {
+            Store store = it.next();
+            store.putAllToMap(map);
         }
         return map;
     }
@@ -72,6 +70,8 @@ public class StoreBasedDynamicConfiguration implements DynamicConfiguration {
          * @return the value or null if this store has no value configured for key.
          */
         String get(String key);
+
+        void putAllToMap(Map<String, String> map);
     }
 
     private static class PropertiesStore implements Store {
@@ -133,6 +133,11 @@ public class StoreBasedDynamicConfiguration implements DynamicConfiguration {
         }
 
         @Override
+        public void putAllToMap(Map<String, String> map) {
+            map.putAll(propertyByName);
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -158,6 +163,15 @@ public class StoreBasedDynamicConfiguration implements DynamicConfiguration {
         }
 
         @Override
+        public void putAllToMap(Map<String, String> map) {
+            for (Map.Entry<String, String> entry : System.getenv().entrySet()) {
+                if (entry.getKey().startsWith(prefix)) {
+                    map.put(entry.getKey().substring(prefix.length()), entry.getValue());
+                }
+            }
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -177,6 +191,13 @@ public class StoreBasedDynamicConfiguration implements DynamicConfiguration {
 
         public String get(String key) {
             return System.getProperty(key);
+        }
+
+        @Override
+        public void putAllToMap(Map<String, String> map) {
+            for (Map.Entry<Object, Object> entry : System.getProperties().entrySet()) {
+                map.put((String) entry.getKey(), (String) entry.getValue());
+            }
         }
 
         @Override
@@ -214,6 +235,11 @@ public class StoreBasedDynamicConfiguration implements DynamicConfiguration {
 
         public String get(String key) {
             return valueByKey.get(key);
+        }
+
+        @Override
+        public void putAllToMap(Map<String, String> map) {
+            map.putAll(valueByKey);
         }
 
         @Override
