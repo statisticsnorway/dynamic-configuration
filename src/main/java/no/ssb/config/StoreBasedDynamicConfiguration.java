@@ -257,7 +257,15 @@ public class StoreBasedDynamicConfiguration implements DynamicConfiguration {
     }
 
     public static class Builder {
-        final Deque<Store> storeList = new LinkedList<>();
+        final Deque<Store> storeList;
+
+        public Builder() {
+            storeList = new LinkedList<>();
+        }
+
+        private Builder(Builder builder) {
+            storeList = new LinkedList<>(builder.storeList);
+        }
 
         public Builder propertiesResource(String resourcePath) {
             storeList.addFirst(new PropertiesStore(resourcePath));
@@ -281,6 +289,23 @@ public class StoreBasedDynamicConfiguration implements DynamicConfiguration {
 
         public StoreBasedDynamicConfiguration build() {
             return new StoreBasedDynamicConfiguration(storeList);
+        }
+
+        public Builder copy() {
+            return new Builder(this);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Builder builder = (Builder) o;
+            return storeList.equals(builder.storeList);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(storeList);
         }
     }
 }

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 
 public class StoreBasedDynamicConfigurationTest {
@@ -119,4 +120,24 @@ public class StoreBasedDynamicConfigurationTest {
         assertEquals(map.get("PATH"), System.getenv("PATH"));
     }
 
+    @Test
+    public void thatStoreBasedDynamicConfigurationIsDeepCopied() {
+        StoreBasedDynamicConfiguration.Builder builder = new StoreBasedDynamicConfiguration.Builder()
+                .propertiesResource("storebaseddynamicconfigurationtest.properties");
+
+        StoreBasedDynamicConfiguration.Builder copyBuilder = builder.copy();
+        assertEquals(builder, copyBuilder);
+
+        builder.values("foo", "bar");
+        assertNotEquals(builder, copyBuilder);
+
+        copyBuilder.values("foo", "bar");
+        assertEquals(builder, copyBuilder);
+
+        builder.values("IamKey", "I'm a value");
+        assertNotEquals(builder, copyBuilder);
+
+        copyBuilder.values("IamKey", "I'm a value");
+        assertEquals(builder, copyBuilder);
+    }
 }
